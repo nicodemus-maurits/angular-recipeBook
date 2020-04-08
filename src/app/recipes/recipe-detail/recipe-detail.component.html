@@ -28,7 +28,9 @@
           >
         </li>
         <li><a routerLink="edit">Edit Recipe</a></li>
-        <li><a appCursorPointer>Delete Recipe</a></li>
+        <li>
+          <a appCursorPointer (click)="onDeleteRecipe()">Delete Recipe</a>
+        </li>
       </ul>
     </div>
   </div>
