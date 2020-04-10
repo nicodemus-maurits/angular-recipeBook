@@ -10,21 +10,26 @@ export class RecipeService {
   recipesChanged = new Subject<Recipe[]>();
 
   private recipes: Recipe[] = [
-    new Recipe(
-      'A test recipe',
-      'This is simply a test',
-      'https://cdn.pixabay.com/photo/2016/06/15/19/09/food-1459693_960_720.jpg',
-      [new Ingredient('salmon', 2), new Ingredient('salt', 5)]
-    ),
-    new Recipe(
-      'Another test recipe',
-      'This is simply a test',
-      'https://cdn.pixabay.com/photo/2016/06/15/19/09/food-1459693_960_720.jpg',
-      [new Ingredient('salmon', 3), new Ingredient('vegetables', 5)]
-    ),
+    // new Recipe(
+    //   'A test recipe',
+    //   'This is simply a test',
+    //   'https://cdn.pixabay.com/photo/2016/06/15/19/09/food-1459693_960_720.jpg',
+    //   [new Ingredient('salmon', 2), new Ingredient('salt', 5)]
+    // ),
+    // new Recipe(
+    //   'Another test recipe',
+    //   'This is simply a test',
+    //   'https://cdn.pixabay.com/photo/2016/06/15/19/09/food-1459693_960_720.jpg',
+    //   [new Ingredient('salmon', 3), new Ingredient('vegetables', 5)]
+    // ),
   ];
 
   constructor(private shoppingListService: ShoppingListService) {}
+
+  setRecipes(recipes: Recipe[]) {
+    this.recipes = recipes;
+    this.triggerRecipesUpdate();
+  }
 
   getRecipes() {
     return [...this.recipes];
