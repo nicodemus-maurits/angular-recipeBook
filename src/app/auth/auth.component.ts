@@ -8,6 +8,8 @@ import { AuthService } from './auth.service';
 })
 export class AuthComponent implements OnInit {
   isLoginMode: boolean = true;
+  isLoading: boolean = false;
+  error: string = null;
   authForm: FormGroup;
 
   constructor(private authService: AuthService) {}
@@ -28,22 +30,29 @@ export class AuthComponent implements OnInit {
   }
 
   onSubmit() {
+    this.error = null;
     if (!this.authForm.valid) {
       return;
     }
     const { email, password, confirmPassword } = this.authForm.value;
+    this.isLoading = true;
     if (this.isLoginMode) {
+      this.isLoading = false;
     } else {
       if (password === confirmPassword) {
         this.authService.signup(email, password).subscribe(
           (response) => {
             console.log(response);
+            this.isLoading = false;
           },
           (error) => {
-            console.log(error);
+            this.error = 'An error occured!';
+            this.isLoading = false;
           }
         );
       } else {
+        this.isLoading = false;
+        this.error = 'Password do not match! ';
         return;
       }
     }
