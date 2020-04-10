@@ -45,15 +45,15 @@ export class AuthComponent implements OnInit {
             console.log(response);
             this.isLoading = false;
           },
-          (error) => {
-            this.error = 'An error occured!';
+          (errorMessage) => {
             this.isLoading = false;
+            this.error = errorMessage;
+            console.log(errorMessage);
           }
         );
       } else {
         this.isLoading = false;
         this.error = 'Password do not match! ';
-        return;
       }
     }
 
