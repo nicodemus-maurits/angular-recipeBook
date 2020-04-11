@@ -16,7 +16,7 @@ export interface AuthResponseData {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  user = new Subject<User>();
+  authenticatedUser = new Subject<User>();
 
   constructor(private httpClient: HttpClient) {}
 
@@ -26,7 +26,10 @@ export class AuthService {
         'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBXGuQsN2Gr7f-PHu904oDhR48cCjDsvfE',
         { email, password, returnSecureToken: true }
       )
-      .pipe(catchError(this.handleError), tap(this.handleAuthenticatedUser));
+      .pipe(
+        catchError(this.handleError),
+        tap(this.handleAuthenticatedUser.bind(this))
+      );
   }
 
   login(email: string, password: string) {
@@ -35,7 +38,11 @@ export class AuthService {
         'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBXGuQsN2Gr7f-PHu904oDhR48cCjDsvfE',
         { email, password, returnSecureToken: true }
       )
-      .pipe(catchError(this.handleError), tap(this.handleAuthenticatedUser));
+      .pipe(
+        catchError(this.handleError),
+        // Have to use bind because we are using 'this' in handleAuthenticatedUser function
+        tap(this.handleAuthenticatedUser.bind(this))
+      );
   }
 
   private handleError(resError: HttpErrorResponse) {
@@ -68,6 +75,6 @@ export class AuthService {
     const user = new User(email, localId, idToken, expirationDate);
     console.log(user);
 
-    this.user.next(user);
+    this.authenticatedUser.next(user);
   }
 }
