@@ -90,4 +90,8 @@ export class AuthComponent implements OnInit {
 
     this.authForm.reset({ email });
   }
+
+  onHandleError() {
+    this.error = null;
+  }
 }
