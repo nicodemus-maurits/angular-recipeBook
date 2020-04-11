@@ -46,6 +46,30 @@ export class AuthService {
       );
   }
 
+  autoLogin() {
+    const userData: {
+      email: string;
+      id: string;
+      _token: string;
+      _tokenExpirationDate: string;
+    } = JSON.parse(localStorage.getItem('userData'));
+    if (!userData) {
+      return;
+    }
+    const { email, id, _token, _tokenExpirationDate } = userData;
+
+    const loadedUser = new User(
+      email,
+      id,
+      _token,
+      new Date(_tokenExpirationDate)
+    );
+
+    if (loadedUser.token) {
+      this.authenticatedUser.next(loadedUser);
+    }
+  }
+
   private handleError(resError: HttpErrorResponse) {
     let errorMessage = 'Unknown Error has been occured!';
     if (!resError.error || !resError.error.error) {
@@ -71,14 +95,12 @@ export class AuthService {
   }
 
   private handleAuthenticatedUser(resData) {
-    console.log('resdata: ' + resData);
-
     const { email, localId, idToken, expiresIn } = resData;
     const expirationDate = new Date(new Date().getTime() + +expiresIn * 1000);
     const user = new User(email, localId, idToken, expirationDate);
-    console.log(user);
-
     this.authenticatedUser.next(user);
+
+    localStorage.setItem('userData', JSON.stringify(user));
   }
 
   logout() {
