@@ -1,6 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { AuthService } from './auth.service';
+import { Observable } from 'rxjs';
+
+import { AuthService, AuthResponseData } from './auth.service';
 
 @Component({
   selector: 'app-auth',
@@ -12,7 +19,10 @@ export class AuthComponent implements OnInit {
   error: string = null;
   authForm: FormGroup;
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.authForm = new FormGroup({
@@ -27,6 +37,17 @@ export class AuthComponent implements OnInit {
 
   onSwitchMode() {
     this.isLoginMode = !this.isLoginMode;
+    const confirmPasswordControl = this.authForm.get('confirmPassword');
+
+    if (this.isLoginMode) {
+      confirmPasswordControl.setValidators(null);
+    } else {
+      confirmPasswordControl.setValidators([
+        Validators.required,
+        Validators.minLength(6),
+      ]);
+    }
+    this.cdr.detectChanges();
   }
 
   onSubmit() {
@@ -36,27 +57,34 @@ export class AuthComponent implements OnInit {
     }
     const { email, password, confirmPassword } = this.authForm.value;
     this.isLoading = true;
+
+    let authObs: Observable<AuthResponseData>;
+
     if (this.isLoginMode) {
-      this.isLoading = false;
+      authObs = this.authService.login(email, password);
     } else {
       if (password === confirmPassword) {
-        this.authService.signup(email, password).subscribe(
-          (response) => {
-            console.log(response);
-            this.isLoading = false;
-          },
-          (errorMessage) => {
-            this.isLoading = false;
-            this.error = errorMessage;
-            console.log(errorMessage);
-          }
-        );
+        authObs = this.authService.signup(email, password);
       } else {
         this.isLoading = false;
-        this.error = 'Password do not match! ';
+        this.error = 'Password do not match!';
       }
     }
 
-    this.authForm.reset();
+    if (authObs) {
+      authObs.subscribe(
+        (response) => {
+          console.log(response);
+          this.isLoading = false;
+        },
+        (errorMessage) => {
+          console.log(errorMessage);
+          this.error = errorMessage;
+          this.isLoading = false;
+        }
+      );
+    }
+
+    this.authForm.reset({ email });
   }
 }
