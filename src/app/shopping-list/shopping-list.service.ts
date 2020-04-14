@@ -31,6 +31,7 @@ export class ShoppingListService {
   }
 
   addIngredients(ings: Ingredient[]) {
+    // this.store.dispatch()
     this.ingredients.push(...ings);
     this.ingredientsChanged.next([...this.ingredients]);
   }
