@@ -1,14 +1,12 @@
-import {
-  Component,
-  OnInit,
-  AfterViewInit,
-  ChangeDetectorRef,
-} from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 
 import { AuthService, AuthResponseData } from './auth.service';
+import * as fromApp from '../store/app.reducer';
+import * as AuthActions from './store/auth.actions';
 
 @Component({
   selector: 'app-auth',
@@ -23,7 +21,8 @@ export class AuthComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private store: Store<fromApp.AppState>
   ) {}
 
   ngOnInit() {
@@ -34,6 +33,11 @@ export class AuthComponent implements OnInit {
         Validators.minLength(6),
       ]),
       confirmPassword: new FormControl(null),
+    });
+
+    this.store.select('auth').subscribe((authState) => {
+      this.isLoading = authState.loading;
+      this.error = authState.authError;
     });
   }
 
@@ -63,7 +67,9 @@ export class AuthComponent implements OnInit {
     let authObs: Observable<AuthResponseData>;
 
     if (this.isLoginMode) {
-      authObs = this.authService.login(email, password);
+      this.store.dispatch(new AuthActions.LoginStart({ email, password }));
+
+      // authObs = this.authService.login(email, password);
     } else {
       if (password === confirmPassword) {
         authObs = this.authService.signup(email, password);
@@ -73,20 +79,20 @@ export class AuthComponent implements OnInit {
       }
     }
 
-    if (authObs) {
-      authObs.subscribe(
-        (response) => {
-          console.log(response);
-          this.isLoading = false;
-          this.router.navigate(['/recipes']);
-        },
-        (errorMessage) => {
-          console.log(errorMessage);
-          this.error = errorMessage;
-          this.isLoading = false;
-        }
-      );
-    }
+    // if (authObs) {
+    //   authObs.subscribe(
+    //     (response) => {
+    //       console.log(response);
+    //       this.isLoading = false;
+    //       this.router.navigate(['/recipes']);
+    //     },
+    //     (errorMessage) => {
+    //       console.log(errorMessage);
+    //       this.error = errorMessage;
+    //       this.isLoading = false;
+    //     }
+    //   );
+    // }
 
     this.authForm.reset({ email });
   }
