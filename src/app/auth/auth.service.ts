@@ -31,30 +31,30 @@ export class AuthService {
     private store: Store<fromApp.AppState>
   ) {}
 
-  signup(email: string, password: string) {
-    return this.httpClient
-      .post<AuthResponseData>(
-        environment.firebaseSignUpURL + environment.firebaseAPIKey,
-        { email, password, returnSecureToken: true }
-      )
-      .pipe(
-        catchError(this.handleError),
-        tap(this.handleAuthenticatedUser.bind(this))
-      );
-  }
+  // signup(email: string, password: string) {
+  //   return this.httpClient
+  //     .post<AuthResponseData>(
+  //       environment.firebaseSignUpURL + environment.firebaseAPIKey,
+  //       { email, password, returnSecureToken: true }
+  //     )
+  //     .pipe(
+  //       catchError(this.handleError),
+  //       tap(this.handleAuthenticatedUser.bind(this))
+  //     );
+  // }
 
-  login(email: string, password: string) {
-    return this.httpClient
-      .post<AuthResponseData>(
-        environment.firebaseLoginURL + environment.firebaseAPIKey,
-        { email, password, returnSecureToken: true }
-      )
-      .pipe(
-        catchError(this.handleError),
-        // Have to use bind because we are using 'this' in handleAuthenticatedUser function
-        tap(this.handleAuthenticatedUser.bind(this))
-      );
-  }
+  // login(email: string, password: string) {
+  //   return this.httpClient
+  //     .post<AuthResponseData>(
+  //       environment.firebaseLoginURL + environment.firebaseAPIKey,
+  //       { email, password, returnSecureToken: true }
+  //     )
+  //     .pipe(
+  //       catchError(this.handleError),
+  //       // Have to use bind because we are using 'this' in handleAuthenticatedUser function
+  //       tap(this.handleAuthenticatedUser.bind(this))
+  //     );
+  // }
 
   autoLogin() {
     const userData: {
@@ -77,7 +77,7 @@ export class AuthService {
 
     if (_token) {
       this.store.dispatch(
-        new AuthActions.Login({
+        new AuthActions.AuthenticateSuccess({
           email,
           userId: id,
           token: _token,
@@ -120,7 +120,7 @@ export class AuthService {
     const expirationDate = new Date(new Date().getTime() + +expiresIn * 1000);
     const user = new User(email, localId, idToken, expirationDate);
     this.store.dispatch(
-      new AuthActions.Login({
+      new AuthActions.AuthenticateSuccess({
         email,
         userId: localId,
         token: idToken,
@@ -142,7 +142,7 @@ export class AuthService {
       clearTimeout(this.tokenExpirationTimer);
     }
     this.tokenExpirationTimer = null;
-    this.router.navigate(['/auth']);
+    // this.router.navigate(['/auth']);
   }
 
   autoLogout(expirationDuration: number) {

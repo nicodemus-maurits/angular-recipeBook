@@ -1,6 +1,6 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -12,11 +12,12 @@ import * as AuthActions from './store/auth.actions';
   selector: 'app-auth',
   templateUrl: './auth.component.html',
 })
-export class AuthComponent implements OnInit {
+export class AuthComponent implements OnInit, OnDestroy {
   isLoginMode: boolean = true;
   isLoading: boolean = false;
   error: string = null;
   authForm: FormGroup;
+  private storeSub: Subscription;
 
   constructor(
     private authService: AuthService,
@@ -35,7 +36,7 @@ export class AuthComponent implements OnInit {
       confirmPassword: new FormControl(null),
     });
 
-    this.store.select('auth').subscribe((authState) => {
+    this.storeSub = this.store.select('auth').subscribe((authState) => {
       this.isLoading = authState.loading;
       this.error = authState.authError;
     });
@@ -62,9 +63,9 @@ export class AuthComponent implements OnInit {
       return;
     }
     const { email, password, confirmPassword } = this.authForm.value;
-    this.isLoading = true;
+    // this.isLoading = true;
 
-    let authObs: Observable<AuthResponseData>;
+    // let authObs: Observable<AuthResponseData>;
 
     if (this.isLoginMode) {
       this.store.dispatch(new AuthActions.LoginStart({ email, password }));
@@ -72,7 +73,8 @@ export class AuthComponent implements OnInit {
       // authObs = this.authService.login(email, password);
     } else {
       if (password === confirmPassword) {
-        authObs = this.authService.signup(email, password);
+        this.store.dispatch(new AuthActions.SignupStart({ email, password }));
+        // authObs = this.authService.signup(email, password);
       } else {
         this.isLoading = false;
         this.error = 'Password do not match!';
@@ -98,6 +100,11 @@ export class AuthComponent implements OnInit {
   }
 
   onHandleError() {
-    this.error = null;
+    // this.error = null;
+    this.store.dispatch(new AuthActions.ClearError());
+  }
+
+  ngOnDestroy() {
+    if (this.storeSub) this.storeSub.unsubscribe();
   }
 }
