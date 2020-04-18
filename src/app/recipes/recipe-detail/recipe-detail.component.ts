@@ -6,6 +6,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { Recipe } from '../recipe.model';
 import { RecipeService } from '../recipe.service';
 import * as fromApp from '../../store/app.reducer';
+import * as RecipesActions from '../store/recipe.actions';
 
 @Component({
   selector: 'app-recipe-detail',
@@ -28,14 +29,14 @@ export class RecipeDetailComponent implements OnInit {
       .pipe(
         map((params: Params) => +params['id']),
         switchMap((recipeId: number) => {
-          return this.store
-            .select('recipes')
-            .pipe(
-              map((recipesState) =>
-                recipesState.recipes.find((recipe, index) => index === recipeId)
-              )
-            );
-        })
+          this.recipeIndex = recipeId;
+          return this.store.select('recipes');
+        }),
+        map((recipesState) =>
+          recipesState.recipes.find(
+            (recipe, index) => index === this.recipeIndex
+          )
+        )
       )
       .subscribe((recipe) => {
         this.recipe = recipe;
@@ -47,7 +48,9 @@ export class RecipeDetailComponent implements OnInit {
   }
 
   onDeleteRecipe() {
-    this.recipeService.deleteRecipe(this.recipeIndex);
+    this.store.dispatch(new RecipesActions.DeleteRecipe(this.recipeIndex));
+
+    // this.recipeService.deleteRecipe(this.recipeIndex);
     this.router.navigate(['../'], { relativeTo: this.route });
   }
 }
