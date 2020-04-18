@@ -10,8 +10,6 @@ import { take, map, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import { Recipe } from './recipe.model';
-import { DataStorageService } from '../shared/data-storage.service';
-import { RecipeService } from './recipe.service';
 import * as fromApp from '../store/app.reducer';
 import * as RecipesActions from '../recipes/store/recipe.actions';
 
@@ -19,7 +17,6 @@ import * as RecipesActions from '../recipes/store/recipe.actions';
 export class RecipesResolverService implements Resolve<Recipe[]> {
   constructor(
     private store: Store<fromApp.AppState>,
-    private recipeService: RecipeService,
     private actions$: Actions
   ) {}
 
